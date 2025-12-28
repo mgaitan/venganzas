@@ -11,6 +11,8 @@ const elements = {
   yearFilter: document.getElementById("yearFilter"),
   monthFilter: document.getElementById("monthFilter"),
   offlineToggle: document.getElementById("offlineToggle"),
+  offlineCount: document.getElementById("offlineCount"),
+  offlineClear: document.getElementById("offlineClear"),
   clearBtn: document.getElementById("clearBtn"),
   status: document.getElementById("status"),
   resultsCount: document.getElementById("resultsCount"),
@@ -33,6 +35,13 @@ const loadOffline = () => {
 
 const saveOffline = (offline) => {
   localStorage.setItem(OFFLINE_KEY, JSON.stringify(offline));
+};
+
+const updateOfflineSummary = () => {
+  if (!elements.offlineCount || !elements.offlineClear) return;
+  const count = Object.keys(state.offline).length;
+  elements.offlineCount.textContent = `${count} descargados`;
+  elements.offlineClear.disabled = count === 0;
 };
 
 const isOfflineSaved = (post) => {
@@ -185,6 +194,7 @@ const createCard = (post) => {
             saved_at: Date.now(),
           };
           saveOffline(state.offline);
+          updateOfflineSummary();
           setOfflineUI(true);
           updateStatus("Audio guardado para offline.");
         } catch (error) {
@@ -196,6 +206,7 @@ const createCard = (post) => {
           await cache.delete(post.audio_url);
           delete state.offline[post.id];
           saveOffline(state.offline);
+          updateOfflineSummary();
           setOfflineUI(false);
           updateStatus("Audio eliminado del modo offline.");
         } catch (error) {
@@ -323,6 +334,7 @@ const debounce = (fn, wait = 200) => {
 
 const init = async () => {
   state.offline = loadOffline();
+  updateOfflineSummary();
   updateStatus("Cargando indice...");
   try {
     const response = await fetch("data/index.json", { cache: "no-store" });
@@ -349,6 +361,29 @@ elements.yearFilter.addEventListener("change", applyFilters);
 elements.monthFilter.addEventListener("change", applyFilters);
 if (elements.offlineToggle) {
   elements.offlineToggle.addEventListener("change", applyFilters);
+}
+if (elements.offlineClear) {
+  elements.offlineClear.addEventListener("click", async () => {
+    if (!("caches" in window)) {
+      updateStatus("Tu navegador no soporta cache offline.");
+      return;
+    }
+    elements.offlineClear.disabled = true;
+    try {
+      await caches.delete(OFFLINE_CACHE);
+      state.offline = {};
+      saveOffline(state.offline);
+      updateOfflineSummary();
+      updateStatus("Descargas offline eliminadas.");
+      if (elements.offlineToggle && elements.offlineToggle.checked) {
+        applyFilters();
+      }
+    } catch (error) {
+      updateStatus("No se pudieron limpiar las descargas.");
+    } finally {
+      updateOfflineSummary();
+    }
+  });
 }
 
 elements.clearBtn.addEventListener("click", () => {

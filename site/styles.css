@@ -104,6 +104,22 @@ h1 {
     font-size: 0.9rem;
 }
 
+.offline-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.offline-panel button {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
 .actions {
     display: flex;
     flex-wrap: wrap;
