@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Venganzas del Pasado - Mobile</title>
+    <meta name="description" content="Buscador mobile-friendly del archivo de La Venganza Sera Terrible." />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Newsreader:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <p class="kicker">Archivo liviano</p>
+        <h1>Venganzas del Pasado</h1>
+        <p class="subhead">Busqueda rapida de audios y transcripciones, optimizada para telefono.</p>
+      </div>
+    </header>
+
+    <main class="app">
+      <section class="panel">
+        <label class="field">
+          <span>Buscar por fecha, titulo o palabra clave</span>
+          <input id="searchInput" type="search" placeholder="Ej: 1998-05-02, Egipto, Dolina" autocomplete="off" />
+        </label>
+        <div class="filters">
+          <label class="field">
+            <span>Anio</span>
+            <select id="yearFilter">
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Mes</span>
+            <select id="monthFilter">
+              <option value="">Todos</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09">09</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          </label>
+        </div>
+        <label class="checkbox">
+          <input id="transcriptToggle" type="checkbox" />
+          <span>Cargar transcripciones (descarga adicional)</span>
+        </label>
+        <div class="actions">
+          <button id="clearBtn" type="button">Limpiar filtros</button>
+          <span id="status" class="status">Cargando indice...</span>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="results-header">
+          <p id="resultsCount">0 resultados</p>
+          <button id="loadMore" type="button" hidden>Cargar mas</button>
+        </div>
+        <div id="resultsList" class="results-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
