@@ -188,7 +188,12 @@ const createCard = (post) => {
         updateStatus("Descargando audio para offline...");
         try {
           const cache = await caches.open(OFFLINE_CACHE);
-          await cache.add(new Request(post.audio_url, { mode: "cors" }));
+          const request = new Request(post.audio_url, { mode: "no-cors" });
+          const response = await fetch(request);
+          if (!response.ok && response.type !== "opaque") {
+            throw new Error("Fetch failed");
+          }
+          await cache.put(request, response);
           state.offline[post.id] = {
             url: post.audio_url,
             saved_at: Date.now(),
@@ -198,18 +203,21 @@ const createCard = (post) => {
           setOfflineUI(true);
           updateStatus("Audio guardado para offline.");
         } catch (error) {
+          console.error(error);
           updateStatus("No se pudo guardar el audio offline.");
         }
       } else {
         try {
           const cache = await caches.open(OFFLINE_CACHE);
-          await cache.delete(post.audio_url);
+          const request = new Request(post.audio_url, { mode: "no-cors" });
+          await cache.delete(request);
           delete state.offline[post.id];
           saveOffline(state.offline);
           updateOfflineSummary();
           setOfflineUI(false);
           updateStatus("Audio eliminado del modo offline.");
         } catch (error) {
+          console.error(error);
           updateStatus("No se pudo borrar el audio offline.");
         }
       }
@@ -379,9 +387,11 @@ if (elements.offlineClear) {
         applyFilters();
       }
     } catch (error) {
+      console.error(error);
       updateStatus("No se pudieron limpiar las descargas.");
     } finally {
       updateOfflineSummary();
+      applyFilters();
     }
   });
 }
