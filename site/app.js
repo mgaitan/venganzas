@@ -1,19 +1,14 @@
 const state = {
   posts: [],
   filtered: [],
-  transcripts: null,
-  transcriptsNormalized: null,
-  transcriptsPromise: null,
   pageSize: 50,
   page: 0,
-  loadingTranscripts: false,
 };
 
 const elements = {
   searchInput: document.getElementById("searchInput"),
   yearFilter: document.getElementById("yearFilter"),
   monthFilter: document.getElementById("monthFilter"),
-  transcriptToggle: document.getElementById("transcriptToggle"),
   clearBtn: document.getElementById("clearBtn"),
   status: document.getElementById("status"),
   resultsCount: document.getElementById("resultsCount"),
@@ -126,49 +121,11 @@ const createCard = (post) => {
     card.appendChild(resume);
   }
 
-  let transcriptWrap = null;
-  if (post.has_transcription === "1") {
-    transcriptWrap = document.createElement("div");
-    transcriptWrap.className = "transcript-wrap";
-
-    const transcriptButton = document.createElement("button");
-    transcriptButton.type = "button";
-    transcriptButton.className = "transcript-toggle";
-    transcriptButton.textContent = state.transcripts
-      ? "Ver transcripcion"
-      : "Cargar transcripcion";
-
-    const transcriptBody = document.createElement("div");
-    transcriptBody.className = "transcript";
-    transcriptBody.hidden = true;
-
-    transcriptButton.addEventListener("click", async () => {
-      if (!state.transcripts) {
-        transcriptButton.textContent = "Cargando...";
-        await loadTranscripts();
-      }
-      if (!transcriptBody.dataset.loaded) {
-        renderTranscript(post, transcriptBody, audio);
-        transcriptBody.dataset.loaded = "1";
-      }
-      transcriptBody.hidden = !transcriptBody.hidden;
-      transcriptButton.textContent = transcriptBody.hidden
-        ? "Ver transcripcion"
-        : "Ocultar transcripcion";
-    });
-
-    transcriptWrap.appendChild(transcriptButton);
-    transcriptWrap.appendChild(transcriptBody);
-  }
-
   card.appendChild(badge);
   card.appendChild(title);
   card.appendChild(meta);
   card.appendChild(audio);
   card.appendChild(links);
-  if (transcriptWrap) {
-    card.appendChild(transcriptWrap);
-  }
 
   return card;
 };
@@ -200,103 +157,6 @@ const attachProgressTracker = (post, audio) => {
   });
 };
 
-const getTranscriptPayload = (postId) => {
-  if (!state.transcripts) return null;
-  const payload = state.transcripts[postId];
-  if (!payload) return null;
-  if (typeof payload === "string") {
-    return { text: payload, segments: [] };
-  }
-  return {
-    text: payload.text || "",
-    segments: Array.isArray(payload.segments) ? payload.segments : [],
-  };
-};
-
-const renderTranscript = (post, container, audio) => {
-  const payload = getTranscriptPayload(post.id);
-  if (!payload) {
-    container.textContent = "Transcripcion no disponible.";
-    return;
-  }
-  if (!payload.segments.length) {
-    container.textContent = payload.text || "Transcripcion no disponible.";
-    return;
-  }
-
-  const lines = [];
-  const times = [];
-
-  payload.segments.forEach((segment) => {
-    const line = document.createElement("button");
-    line.type = "button";
-    line.className = "transcript-line";
-    line.dataset.time = segment.t;
-
-    const time = document.createElement("span");
-    time.className = "transcript-time";
-    time.textContent = segment.label || "";
-
-    const text = document.createElement("span");
-    text.className = "transcript-text";
-    text.textContent = segment.text || "";
-
-    line.appendChild(time);
-    line.appendChild(text);
-
-    line.addEventListener("click", () => {
-      if (!Number.isNaN(segment.t)) {
-        audio.currentTime = segment.t;
-        audio.play();
-      }
-    });
-
-    container.appendChild(line);
-    lines.push(line);
-    times.push(segment.t || 0);
-  });
-
-  bindKaraoke(audio, container, lines, times);
-};
-
-const bindKaraoke = (audio, container, lines, times) => {
-  let lastIndex = -1;
-
-  const findIndex = (current) => {
-    let lo = 0;
-    let hi = times.length - 1;
-    let result = -1;
-    while (lo <= hi) {
-      const mid = Math.floor((lo + hi) / 2);
-      if (times[mid] <= current) {
-        result = mid;
-        lo = mid + 1;
-      } else {
-        hi = mid - 1;
-      }
-    }
-    return result;
-  };
-
-  const update = () => {
-    if (container.hidden) return;
-    const current = audio.currentTime + 0.2;
-    const index = findIndex(current);
-    if (index === lastIndex) return;
-    if (lastIndex >= 0 && lines[lastIndex]) {
-      lines[lastIndex].classList.remove("active");
-    }
-    if (index >= 0 && lines[index]) {
-      lines[index].classList.add("active");
-      lines[index].scrollIntoView({ block: "nearest" });
-    }
-    lastIndex = index;
-  };
-
-  audio.addEventListener("timeupdate", update);
-  audio.addEventListener("seeked", update);
-};
-
 const renderResults = () => {
   elements.resultsList.innerHTML = "";
   const limit = (state.page + 1) * state.pageSize;
@@ -318,8 +178,6 @@ const applyFilters = () => {
   const query = normalizeText(elements.searchInput.value || "");
   const year = elements.yearFilter.value;
   const month = elements.monthFilter.value;
-  const includeTranscripts =
-    elements.transcriptToggle.checked && state.transcriptsNormalized;
   const tokens = query ? query.split(" ") : [];
 
   state.filtered = state.posts.filter((post) => {
@@ -328,61 +186,11 @@ const applyFilters = () => {
 
     if (!tokens.length) return true;
     let haystack = post._search;
-    if (includeTranscripts) {
-      const transcript = state.transcriptsNormalized[post.id];
-      if (transcript) {
-        haystack = `${haystack} ${transcript}`;
-      }
-    }
-
     return tokens.every((token) => haystack.includes(token));
   });
 
   state.page = 0;
   renderResults();
-};
-
-const loadTranscripts = () => {
-  if (state.transcriptsPromise) {
-    return state.transcriptsPromise;
-  }
-  if (state.transcriptsNormalized) {
-    return Promise.resolve();
-  }
-  state.loadingTranscripts = true;
-  updateStatus("Cargando transcripciones...");
-  state.transcriptsPromise = (async () => {
-    try {
-      const response = await fetch("data/transcripts.json", {
-        cache: "no-store",
-      });
-      if (!response.ok) {
-        updateStatus(
-          "No se encontro transcripts.json. Ejecuta el scraper con --with-transcripts.",
-        );
-        return;
-      }
-      state.transcripts = await response.json();
-      state.transcriptsNormalized = {};
-      Object.entries(state.transcripts).forEach(([id, payload]) => {
-        if (typeof payload === "string") {
-          state.transcriptsNormalized[id] = normalizeText(payload);
-          return;
-        }
-        if (payload && typeof payload === "object") {
-          state.transcriptsNormalized[id] = normalizeText(payload.text || "");
-        }
-      });
-      updateStatus("Transcripciones listas.");
-    } catch (error) {
-      updateStatus("Error al cargar transcripciones.");
-    } finally {
-      state.loadingTranscripts = false;
-      applyFilters();
-      state.transcriptsPromise = null;
-    }
-  })();
-  return state.transcriptsPromise;
 };
 
 const debounce = (fn, wait = 200) => {
@@ -418,19 +226,11 @@ const debouncedFilter = debounce(applyFilters, 200);
 elements.searchInput.addEventListener("input", debouncedFilter);
 elements.yearFilter.addEventListener("change", applyFilters);
 elements.monthFilter.addEventListener("change", applyFilters);
-elements.transcriptToggle.addEventListener("change", () => {
-  if (elements.transcriptToggle.checked) {
-    loadTranscripts();
-  } else {
-    applyFilters();
-  }
-});
 
 elements.clearBtn.addEventListener("click", () => {
   elements.searchInput.value = "";
   elements.yearFilter.value = "";
   elements.monthFilter.value = "";
-  elements.transcriptToggle.checked = false;
   applyFilters();
 });
 
