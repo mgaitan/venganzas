@@ -24,6 +24,8 @@
 - Definir un flujo reproducible (scraper -> split -> deploy).
 - Agregar una tarea en el workflow para generar `site/transcripts/`
   si decidimos no commitear esa carpeta.
+- Recuperar un workflow de autosincronizacion con venganzasdelpasado
+  (actualizar indice/transcripciones y desplegar).
 
 ## 5) Deploy en GitHub Pages
 - Con transcripciones ya separadas, verificar que el push no vuelva a fallar.
