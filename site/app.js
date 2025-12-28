@@ -10,6 +10,7 @@ const elements = {
   searchInput: document.getElementById("searchInput"),
   yearFilter: document.getElementById("yearFilter"),
   monthFilter: document.getElementById("monthFilter"),
+  offlineToggle: document.getElementById("offlineToggle"),
   clearBtn: document.getElementById("clearBtn"),
   status: document.getElementById("status"),
   resultsCount: document.getElementById("resultsCount"),
@@ -163,6 +164,9 @@ const createCard = (post) => {
         ? "Disponible offline"
         : "No descargado";
       offlineButton.textContent = saved ? "Quitar offline" : "Guardar offline";
+      if (elements.offlineToggle && elements.offlineToggle.checked) {
+        applyFilters();
+      }
     };
 
     offlineButton.addEventListener("click", async () => {
@@ -292,9 +296,11 @@ const applyFilters = () => {
   const query = normalizeText(elements.searchInput.value || "");
   const year = elements.yearFilter.value;
   const month = elements.monthFilter.value;
+  const offlineOnly = elements.offlineToggle && elements.offlineToggle.checked;
   const tokens = query ? query.split(" ") : [];
 
   state.filtered = state.posts.filter((post) => {
+    if (offlineOnly && !isOfflineSaved(post)) return false;
     if (year && post.year !== year) return false;
     if (month && post.month !== month) return false;
 
@@ -341,11 +347,17 @@ const debouncedFilter = debounce(applyFilters, 200);
 elements.searchInput.addEventListener("input", debouncedFilter);
 elements.yearFilter.addEventListener("change", applyFilters);
 elements.monthFilter.addEventListener("change", applyFilters);
+if (elements.offlineToggle) {
+  elements.offlineToggle.addEventListener("change", applyFilters);
+}
 
 elements.clearBtn.addEventListener("click", () => {
   elements.searchInput.value = "";
   elements.yearFilter.value = "";
   elements.monthFilter.value = "";
+  if (elements.offlineToggle) {
+    elements.offlineToggle.checked = false;
+  }
   applyFilters();
 });
 
