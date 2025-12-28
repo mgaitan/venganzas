@@ -3,6 +3,7 @@ const state = {
   filtered: [],
   pageSize: 50,
   page: 0,
+  offline: {},
 };
 
 const elements = {
@@ -17,6 +18,48 @@ const elements = {
 };
 
 const STORAGE_KEY = "vdp-progress";
+const OFFLINE_KEY = "vdp-offline-audio";
+const OFFLINE_CACHE = "vdp-offline-audio-v1";
+
+const loadOffline = () => {
+  try {
+    const raw = localStorage.getItem(OFFLINE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    return {};
+  }
+};
+
+const saveOffline = (offline) => {
+  localStorage.setItem(OFFLINE_KEY, JSON.stringify(offline));
+};
+
+const isOfflineSaved = (post) => {
+  const saved = state.offline[post.id];
+  return saved && saved.url === post.audio_url;
+};
+
+const registerServiceWorker = () => {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("sw.js").catch(() => {
+    updateStatus("No se pudo registrar el modo offline.");
+  });
+};
+
+const loadAudioFromCache = async (audio, url) => {
+  if (!("caches" in window)) return;
+  const cache = await caches.open(OFFLINE_CACHE);
+  const response = await cache.match(url);
+  if (!response) return;
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  if (audio.dataset.objectUrl) {
+    URL.revokeObjectURL(audio.dataset.objectUrl);
+  }
+  audio.dataset.objectUrl = objectUrl;
+  audio.src = objectUrl;
+  audio.load();
+};
 
 const normalizeText = (value) =>
   value
@@ -98,6 +141,71 @@ const createCard = (post) => {
   postLink.textContent = "Abrir en Venganzas";
   links.appendChild(postLink);
 
+  if (post.audio_url) {
+    const offlineWrap = document.createElement("div");
+    offlineWrap.className = "offline-actions";
+
+    const offlineStatus = document.createElement("span");
+    offlineStatus.className = "offline-status";
+    offlineStatus.textContent = isOfflineSaved(post)
+      ? "Disponible offline"
+      : "No descargado";
+
+    const offlineButton = document.createElement("button");
+    offlineButton.type = "button";
+    offlineButton.className = "offline-btn";
+    offlineButton.textContent = isOfflineSaved(post)
+      ? "Quitar offline"
+      : "Guardar offline";
+
+    const setOfflineUI = (saved) => {
+      offlineStatus.textContent = saved
+        ? "Disponible offline"
+        : "No descargado";
+      offlineButton.textContent = saved ? "Quitar offline" : "Guardar offline";
+    };
+
+    offlineButton.addEventListener("click", async () => {
+      if (!("caches" in window)) {
+        updateStatus("Tu navegador no soporta cache offline.");
+        return;
+      }
+      offlineButton.disabled = true;
+      if (!isOfflineSaved(post)) {
+        updateStatus("Descargando audio para offline...");
+        try {
+          const cache = await caches.open(OFFLINE_CACHE);
+          await cache.add(new Request(post.audio_url, { mode: "cors" }));
+          state.offline[post.id] = {
+            url: post.audio_url,
+            saved_at: Date.now(),
+          };
+          saveOffline(state.offline);
+          setOfflineUI(true);
+          updateStatus("Audio guardado para offline.");
+        } catch (error) {
+          updateStatus("No se pudo guardar el audio offline.");
+        }
+      } else {
+        try {
+          const cache = await caches.open(OFFLINE_CACHE);
+          await cache.delete(post.audio_url);
+          delete state.offline[post.id];
+          saveOffline(state.offline);
+          setOfflineUI(false);
+          updateStatus("Audio eliminado del modo offline.");
+        } catch (error) {
+          updateStatus("No se pudo borrar el audio offline.");
+        }
+      }
+      offlineButton.disabled = false;
+    });
+
+    offlineWrap.appendChild(offlineStatus);
+    offlineWrap.appendChild(offlineButton);
+    links.appendChild(offlineWrap);
+  }
+
   const progress = loadProgress();
   const saved = progress[post.id];
   if (saved && saved.time > 5) {
@@ -155,6 +263,12 @@ const attachProgressTracker = (post, audio) => {
     delete progress[post.id];
     saveProgress(progress);
   });
+
+  audio.addEventListener("play", async () => {
+    if (!navigator.onLine && isOfflineSaved(post)) {
+      await loadAudioFromCache(audio, post.audio_url);
+    }
+  });
 };
 
 const renderResults = () => {
@@ -202,6 +316,7 @@ const debounce = (fn, wait = 200) => {
 };
 
 const init = async () => {
+  state.offline = loadOffline();
   updateStatus("Cargando indice...");
   try {
     const response = await fetch("data/index.json", { cache: "no-store" });
@@ -240,3 +355,12 @@ elements.loadMore.addEventListener("click", () => {
 });
 
 init();
+registerServiceWorker();
+
+window.addEventListener("offline", () => {
+  updateStatus("Sin conexion. Modo offline activo.");
+});
+
+window.addEventListener("online", () => {
+  updateStatus("Conexion restablecida.");
+});

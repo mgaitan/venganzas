@@ -183,6 +183,25 @@ button:disabled {
     text-decoration: underline;
 }
 
+.offline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.offline-status {
+    color: var(--muted);
+}
+
+.offline-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
 .resume {
     display: flex;
     align-items: center;
