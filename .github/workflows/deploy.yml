@@ -5,6 +5,13 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      years:
+        description: "Rango de anos (ej: 1994-2012). Dejar vacio para todos."
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 5 * * 1"
 
 permissions:
   contents: write
@@ -17,10 +24,33 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Update index
+        run: |
+          if [ -n "${{ github.event.inputs.years }}" ]; then
+            YEARS_ARG="--years ${{ github.event.inputs.years }}"
+          else
+            YEARS_ARG=""
+          fi
+          uv run scripts/scrape_vdp.py --out site/data $YEARS_ARG
+
+      - name: Commit data changes
+        run: |
+          if [ -n "$(git status --porcelain site/data)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add site/data
+            git commit -m "chore: actualizar indice [skip ci]"
+            git push
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
