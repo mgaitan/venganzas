@@ -1,7 +1,37 @@
 {
-  "generated_at": "2025-12-29T05:34:46.518814+00:00",
+  "generated_at": "2026-01-05T05:39:39.869377+00:00",
   "source": "https://venganzasdelpasado.com.ar",
   "posts": [
+    {
+      "id": "la-venganza-sera-terrible-del-02-01-2026",
+      "title": "La venganza será terrible del 02/01/2026",
+      "date": "2026-01-02",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-02-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-02.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-30-12-2025",
+      "title": "La venganza será terrible del 30/12/2025",
+      "date": "2025-12-30",
+      "year": "2025",
+      "month": "12",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-30-12-2025",
+      "audio_url": "https://venganzasdelpasado.com.ar/2025/lavenganza_2025-12-30.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-29-12-2025",
+      "title": "La venganza será terrible del 29/12/2025",
+      "date": "2025-12-29",
+      "year": "2025",
+      "month": "12",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-29-12-2025",
+      "audio_url": "https://venganzasdelpasado.com.ar/2025/lavenganza_2025-12-29.mp3",
+      "has_transcription": "1"
+    },
     {
       "id": "la-venganza-sera-terrible-del-26-12-2025",
       "title": "La venganza será terrible del 26/12/2025",
@@ -34513,5 +34543,5 @@
       "has_transcription": "1"
     }
   ],
-  "new_posts": 0
+  "new_posts": 3
 }
