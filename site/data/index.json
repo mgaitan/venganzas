@@ -1,7 +1,57 @@
 {
-  "generated_at": "2026-01-05T05:39:39.869377+00:00",
+  "generated_at": "2026-01-12T05:35:36.739143+00:00",
   "source": "https://venganzasdelpasado.com.ar",
   "posts": [
+    {
+      "id": "la-venganza-sera-terrible-del-09-01-2026",
+      "title": "La venganza será terrible del 09/01/2026",
+      "date": "2026-01-09",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-09-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-09.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-08-01-2026",
+      "title": "La venganza será terrible del 08/01/2026",
+      "date": "2026-01-08",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-08-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-08.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-07-01-2026",
+      "title": "La venganza será terrible del 07/01/2026",
+      "date": "2026-01-07",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-07-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-07.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-06-01-2026",
+      "title": "La venganza será terrible del 06/01/2026",
+      "date": "2026-01-06",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-06-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-06.mp3",
+      "has_transcription": "1"
+    },
+    {
+      "id": "la-venganza-sera-terrible-del-05-01-2026",
+      "title": "La venganza será terrible del 05/01/2026",
+      "date": "2026-01-05",
+      "year": "2026",
+      "month": "01",
+      "post_url": "https://venganzasdelpasado.com.ar/posts/la-venganza-sera-terrible-del-05-01-2026",
+      "audio_url": "https://venganzasdelpasado.com.ar/2026/lavenganza_2026-01-05.mp3",
+      "has_transcription": "1"
+    },
     {
       "id": "la-venganza-sera-terrible-del-02-01-2026",
       "title": "La venganza será terrible del 02/01/2026",
@@ -24924,7 +24974,7 @@
     },
     {
       "id": "la-muerte-de-un-amigo-de-napoleon",
-      "title": "La muerte del coronel Neick",
+      "title": "La muerte del mariscal Ney",
       "date": "",
       "year": "",
       "month": "",
@@ -26124,7 +26174,7 @@
     },
     {
       "id": "ipatia-de-alejandria-aa042856-6ae3-40db-a363-76635bf31a60",
-      "title": "Ipatia de Alejandria",
+      "title": "Hipatia de Alejandría",
       "date": "",
       "year": "",
       "month": "",
@@ -26144,7 +26194,7 @@
     },
     {
       "id": "catalina-cornaro-en-chipre",
-      "title": "Catalina Cornaro en cypre",
+      "title": "Catalina Cornaro en Chipre",
       "date": "",
       "year": "",
       "month": "",
@@ -34543,5 +34593,5 @@
       "has_transcription": "1"
     }
   ],
-  "new_posts": 3
+  "new_posts": 5
 }
